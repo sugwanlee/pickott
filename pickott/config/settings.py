@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 # dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv()
 
@@ -44,10 +45,24 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third party
     'rest_framework',
+    "rest_framework_simplejwt",
     # Local apps
     'account',
     'chatbot',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  # Access Token 유효기간 (기본: 5분 → 30분)
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh Token 유효기간 (기본: 1일 → 7일)
+    "ROTATE_REFRESH_TOKENS": True,  # Refresh Token을 사용할 때마다 새로운 Refresh Token 발급
+    "BLACKLIST_AFTER_ROTATION": True,  # 이전 Refresh Token은 블랙리스트에 추가
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -90,7 +105,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "account.CostumUser"
+AUTH_USER_MODEL = "account.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
