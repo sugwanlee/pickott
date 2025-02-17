@@ -3,8 +3,10 @@ from .models import ChatBot
 from .serializers import ChatBotSerializer
 from rest_framework.response import Response
 from rest_framework import authentication, permissions
+from rest_framework.permissions import IsAuthenticated
 from .chatbot import chat_call
 class ChatBotAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     
     def get(self, request):
         logs = ChatBot.objects.all()
