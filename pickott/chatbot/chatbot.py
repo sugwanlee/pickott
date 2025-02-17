@@ -2,7 +2,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-
+# 정상화
 def chat_call(user_input):
     # 기존 임베딩된 데이터 활용
     embeddings = OpenAIEmbeddings()
