@@ -5,4 +5,4 @@ class ChatBotSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatBot
         fields = "__all__"
-        read_only_fields = ['answer',]
+        read_only_fields = ['answer','user']

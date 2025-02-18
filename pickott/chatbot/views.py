@@ -17,5 +17,5 @@ class ChatBotAPIView(APIView):
         serializer = ChatBotSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             answer = chat_call(request.data.get("question"))
-            serializer.save(answer = answer)
+            serializer.save(answer = answer, user = request.user)
             return Response(serializer.data)
