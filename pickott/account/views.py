@@ -31,5 +31,5 @@ class LogoutView(APIView):
             )
         except Exception as e:
             return Response(
-                {"detail": "tokken error."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "token error."}, status=status.HTTP_400_BAD_REQUEST
             )

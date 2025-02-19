@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # Third party
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     # Local apps
     "account",
     "chatbot",
@@ -59,16 +60,14 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(
-        days=1
-    ),  # Access Token 유효기간 (기본: 5분 → 30분)
-    "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=7
-    ),  # Refresh Token 유효기간 (기본: 1일 → 7일)
-    "ROTATE_REFRESH_TOKENS": True,  # Refresh Token을 사용할 때마다 새로운 Refresh Token 발급
-    "BLACKLIST_AFTER_ROTATION": True,  # 이전 Refresh Token은 블랙리스트에 추가
+    "ACCESS_TOKEN_LIFETIME": timedelta(days = 1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,  # ✅ 블랙리스트 설정 추가
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
