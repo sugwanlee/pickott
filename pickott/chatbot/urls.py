@@ -3,4 +3,4 @@ from . import views
 
 urlpatterns = [
     path("", views.ChatBotAPIView.as_view())
-]
+    ]
