@@ -4,7 +4,10 @@ from langchain_community.document_loaders import CSVLoader
 from langchain_openai import OpenAIEmbeddings
 
 # Data Load
-loader = CSVLoader(file_path="C:/Users/LEE/Documents/github_repo/chtbot_pjt/data/tmdb_movies.csv", encoding="utf-8")
+loader = CSVLoader(
+    file_path="C:/Users/LEE/Documents/github_repo/chtbot_pjt/data/tmdb_movies.csv",
+    encoding="utf-8",
+)
 whole_data = loader.load()
 # print(whole_data)
 
