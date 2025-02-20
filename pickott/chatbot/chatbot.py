@@ -20,7 +20,7 @@ def chat_call(user_input):
     # 기존 임베딩된 데이터 활용
     embeddings = OpenAIEmbeddings()
     vector_store = Chroma(
-        persist_directory="C:/Users/LEE/Documents/github_repo/chtbot_pjt/my_vector_store",
+        persist_directory="C:/Users/ROG/Desktop/pickott/my_vector_store",
         embedding_function=embeddings,
     )
 
