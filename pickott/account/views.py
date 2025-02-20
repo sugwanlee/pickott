@@ -4,7 +4,7 @@ from .serializers import CreateUserSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken # 예외처리 import 추가
 
 class CreateUserView(APIView):
     def post(self, request):
@@ -29,7 +29,12 @@ class LogoutView(APIView):
             return Response(
                 {"detail": "Successfully logged out."}, status=status.HTTP_200_OK
             )
-        except Exception as e:
+        except InvalidToken as e: # InvalidToken 예외 처리 추가!
+            return Response({"detail": f"Invalid token: {e}"}, status=status.HTTP_400_BAD_REQUEST) # 더 자세한 오류 메시지
+        except TokenError as e: # TokenError 예외 처리 추가!
+            return Response({"detail": f"Token error: {e}"}, status=status.HTTP_400_BAD_REQUEST) # 더 자세한 오류 메시지
+        except Exception as e: # 그 외 예외 처리 (혹시 모를 에러 대비)
+            print(f"Unexpected error during logout: {e}") # 서버 로그에 예외 정보 기록 (디버깅 용이)
             return Response(
-                {"detail": "tokken error."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "An unexpected error occurred during logout."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
