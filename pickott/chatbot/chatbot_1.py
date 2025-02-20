@@ -7,6 +7,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.runnables import RunnablePassthrough
 import os
 import datetime
+from pathlib import Path
 
 today = datetime.datetime.today().strftime("%D")  # 오늘 날짜를 'MM/DD/YY' 형식의 문자열로 저장합니다.
 
@@ -82,7 +83,7 @@ while True:
         break
     embeddings = OpenAIEmbeddings()
     vector_store = Chroma( 
-        persist_directory="C:/Users/ROG/Desktop/pickott/my_vector_store
+        persist_directory="../../my_vector_store"
 
     # 벡터 DB가 비어 있는지 체크
     if not vector_store._collection.count():
