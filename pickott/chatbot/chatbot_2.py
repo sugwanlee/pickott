@@ -77,7 +77,7 @@ def chatbot_call(user_input, user):
     )
     embeddings = OpenAIEmbeddings()
     vector_store = Chroma( 
-        persist_directory="C:/Users/LEE/Documents/github_repo/chtbot_pjt/my_vector_store", embedding_function=embeddings)
+        persist_directory="C:/Users/ROG/Desktop/pickott/my_vector_store", embedding_function=embeddings)
 
     # 벡터 DB가 비어 있는지 체크
     if not vector_store._collection.count():
