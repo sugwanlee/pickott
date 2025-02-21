@@ -24,7 +24,6 @@ def chat_call(user_input):
     embeddings = OpenAIEmbeddings()
     vector_store = Chroma(
         persist_directory= f"{BASE_DIR}/my_vector_store", embedding_function=embeddings)
-    )
 
     # 벡터 DB가 비어 있는지 체크
     if not vector_store._collection.count():
