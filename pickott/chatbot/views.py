@@ -9,7 +9,7 @@ from account.models import User
 
 class ChatBotAPIView(APIView):
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         logs = ChatBot.objects.all()
