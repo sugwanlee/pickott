@@ -7,16 +7,22 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.runnables import RunnablePassthrough
 import os
 import datetime
+from pathlib import Path
 
-today = datetime.datetime.today().strftime("%D")  # 오늘 날짜를 'MM/DD/YY' 형식의 문자열로 저장합니다.
+today = datetime.datetime.today().strftime(
+    "%D"
+)  # 오늘 날짜를 'MM/DD/YY' 형식의 문자열로 저장합니다.
 
 api_key = os.getenv("OPENAI_API_KEY")
 
 chat = ChatOpenAI(model="gpt-4o", api_key=api_key)
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+
 chat_history = ChatMessageHistory()
 
 StrOutputParser = StrOutputParser()
+
 
 def summarize_messages(chain_input):
     stored_messages = chat_history.messages
@@ -36,7 +42,7 @@ def summarize_messages(chain_input):
     # chat_history 에 저장된 대화 기록을 요약프롬프트에 입력 & 결과 저장
     summary_message = summarization_chain.invoke({"chat_history": stored_messages})
     # chat_history 에 저장되어있던 기록 지우기
-    
+
     # print(id(chat_history))
     # chat_history.clear()
     # print(id(chat_history))
@@ -45,6 +51,7 @@ def summarize_messages(chain_input):
     # print(summary_message.content)
 
     return True
+
 
 def chatbot_call(user_input, user):
     prompt = ChatPromptTemplate.from_messages(
@@ -60,24 +67,24 @@ def chatbot_call(user_input, user):
             ("human", "{input}"),
         ]
     )
-    
+
     chain = prompt | chat | StrOutputParser
 
     chain_with_message_history = RunnableWithMessageHistory(
-        chain, # 실행할 Runnable 객체
-        lambda session_id: chat_history, # 세션 기록을 가져오는 함수
-        input_messages_key="input", # 입력 메시지의 Key
-        history_messages_key="chat_history", # 대화 히스토리 메시지의 Key
+        chain,  # 실행할 Runnable 객체
+        lambda session_id: chat_history,  # 세션 기록을 가져오는 함수
+        input_messages_key="input",  # 입력 메시지의 Key
+        history_messages_key="chat_history",  # 대화 히스토리 메시지의 Key
     )
-
 
     chain_with_summarization = (
         RunnablePassthrough.assign(messages_summarized=summarize_messages)
         | chain_with_message_history
     )
     embeddings = OpenAIEmbeddings()
-    vector_store = Chroma( 
-        persist_directory="C:/Users/ROG/Desktop/pickott/my_vector_store", embedding_function=embeddings)
+    vector_store = Chroma(
+        persist_directory=f"{BASE_DIR}/my_vector_store", embedding_function=embeddings
+    )
 
     # 벡터 DB가 비어 있는지 체크
     if not vector_store._collection.count():
@@ -92,7 +99,7 @@ def chatbot_call(user_input, user):
     context = "\n".join([doc.page_content for doc in docs])
 
     answer = chain_with_summarization.invoke(
-        {"input": user_input, "context" : context, "today" : today},
+        {"input": user_input, "context": context, "today": today},
         {"configurable": {"session_id": user}},
     )
     return answer

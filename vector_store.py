@@ -5,7 +5,7 @@ from langchain_openai import OpenAIEmbeddings
 
 # Data Load
 loader = CSVLoader(
-    file_path="C:/Users/LEE/Documents/github_repo/chtbot_pjt/data/tmdb_movies.csv",
+    file_path="./data/tmdb_movies_5000.csv",
     encoding="utf-8",
 )
 whole_data = loader.load()
