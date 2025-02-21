@@ -4,6 +4,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.chat_message_histories import ChatMessageHistory
 import os
 import datetime
+from pathlib import Path
 
 LANGSMITH_TRACING = True
 LANGSMITH_ENDPOINT = "https://api.smith.langchain.com"
@@ -14,14 +15,15 @@ today = datetime.datetime.today().strftime(
     "%D"
 )  # 오늘 날짜를 'MM/DD/YY' 형식의 문자열로 저장합니다.
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+
 
 # 정상화
 def chat_call(user_input):
     # 기존 임베딩된 데이터 활용
     embeddings = OpenAIEmbeddings()
     vector_store = Chroma(
-        persist_directory="C:/Users/ROG/Desktop/pickott/my_vector_store",
-        embedding_function=embeddings,
+        persist_directory= f"{BASE_DIR}/my_vector_store", embedding_function=embeddings)
     )
 
     # 벡터 DB가 비어 있는지 체크
