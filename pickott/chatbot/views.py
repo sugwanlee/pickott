@@ -18,8 +18,9 @@ class ChatBotAPIView(APIView):
 
     def post(self, request):
         genre_names = ", ".join([genre.name for genre in request.user.preferred_genre.all()])
+        ott_names = ", ".join([ott.name for ott in request.user.subscribed_ott.all()])
         serializer = ChatBotSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            answer = chatbot_call(request.data.get("question"), request.user.username, genre_names)
+            answer = chatbot_call(request.data.get("question"), request.user.username, genre_names, ott_names, request.data.get("language"))
             serializer.save(answer=answer, user=request.user)
             return Response(serializer.data)

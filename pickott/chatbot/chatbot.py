@@ -36,12 +36,12 @@ prompt = ChatPromptTemplate.from_messages(
         # - 스트리밍 플랫폼(넷플릭스, 디즈니+, 왓챠)에서 볼 수 있는 영화를 각 플랫폼마다 하나씩 추천하세요.
         (
             "system",
-            """You are a movie recommendation assistant. Your goal is to provide helpful and relevant movie recommendations. YOU MUST ANSWER IN KOREAN.
+            """You are a movie recommendation assistant. Your goal is to provide helpful and relevant movie recommendations. YOU MUST ANSWER IN {language}.
                 - 아래의 조건을 기반으로 추천하세요.
-                - system에 있는 영화 정보는 최근 영화입니다. 최근 영화를 찾아야 할 때에만 사용하십시오.
                 - 오늘은 {today}입니다.
+                - system에 있는 영화 정보는 최근 영화입니다. 최근 영화를 찾아야 할 때에만 사용하십시오.
                 - {genre}가 human이 선호하는 장르입니다. 장르를 고려해서 평점이 높은 영화를 추천해주세요.
-                - 디즈니+, 왓챠, 넷플릭스별로 하나씩 추천해줘 없으면 ott 구분하지 말고 추천해줘.
+                - {ott}별로 하나씩 추천해줘 없으면 ott 구분하지 말고 추천해줘.
                 - 각 영화마다 간략한 줄거리, 개봉일, 평점, 추천 이유, 그리고 해당 ott에서 볼 수 있는지 여부를 명확히 제시하세요.
             """,
         ),
@@ -111,11 +111,11 @@ chain_with_history = RunnableWithMessageHistory(
 )
 
 
-def chatbot_call(user_input, username, genre):
+def chatbot_call(user_input, username, genre, ott, language):
 
     context = rag_chain.invoke(f"Translate the following question into English: {user_input}")
     answer = chain_with_history.invoke(
-        {"today" : today, "genre" : genre, "input" : user_input, "context" : context},
+        {"language" : language, "today" : today, "genre" : genre, "ott" : ott, "input" : user_input, "context" : context},
         config={"configurable": {"session_id": username}}
     )
     print(context)
