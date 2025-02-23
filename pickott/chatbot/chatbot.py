@@ -29,20 +29,22 @@ str_outputparser = StrOutputParser()
 # 템플릿
 prompt = ChatPromptTemplate.from_messages(
     [
+        # rag에서 가져온 context
+        ("system", "{context}"),
+        # chat_history로 key값을 불러옴
+        MessagesPlaceholder(variable_name="chat_history"),
+        # - 스트리밍 플랫폼(넷플릭스, 디즈니+, 왓챠)에서 볼 수 있는 영화를 각 플랫폼마다 하나씩 추천하세요.
         (
             "system",
             """You are a movie recommendation assistant. Your goal is to provide helpful and relevant movie recommendations. YOU MUST ANSWER IN KOREAN.
-                - 아래의 조건을 기반으로 추천하세요
-                - today is {today}
-                - {genre}를 고려해서 영화 추천해줘
-                - 각 영화마다 간략한 줄거리, 추천 이유, 그리고 해당 플랫폼에서 볼 수 있는지 여부를 명확히 제시하세요.
+                - 아래의 조건을 기반으로 추천하세요.
+                - system에 있는 영화 정보는 최근 영화입니다. 최근 영화를 찾아야 할 때에만 사용하십시오.
+                - 오늘은 {today}입니다.
+                - {genre}가 human이 선호하는 장르입니다. 장르를 고려해서 평점이 높은 영화를 추천해주세요.
+                - 디즈니+, 왓챠, 넷플릭스별로 하나씩 추천해줘 없으면 ott 구분하지 말고 추천해줘.
+                - 각 영화마다 간략한 줄거리, 개봉일, 평점, 추천 이유, 그리고 해당 ott에서 볼 수 있는지 여부를 명확히 제시하세요.
             """,
         ),
-        # - 스트리밍 플랫폼(넷플릭스, 디즈니+, 왓챠)에서 볼 수 있는 영화를 각 플랫폼마다 하나씩 추천하세요.
-        # chat_history로 key값을 불러옴
-        MessagesPlaceholder(variable_name="chat_history"),
-        # rag에서 가져온 context
-        ("system", "{context}"),
         # 물어본 질문(user_input)
         ("human", "{input}"),
     ]
@@ -64,7 +66,7 @@ embeddings = OpenAIEmbeddings(
     model="text-embedding-3-small",
     )
 
-# 벡터터db 설정
+# 벡터db 설정
 vector_store = Chroma( 
     persist_directory= f"{BASE_DIR}/my_vector_store", embedding_function=embeddings)
 
@@ -86,7 +88,7 @@ def docs_join_logic(docs):
 docs_join = RunnableLambda(docs_join_logic)
 
 # 체인
-rag_chain = retriever | docs_join
+rag_chain = chat | str_outputparser | retriever | docs_join
 chain = prompt | chat | str_outputparser
 
 
@@ -111,9 +113,10 @@ chain_with_history = RunnableWithMessageHistory(
 
 def chatbot_call(user_input, username, genre):
 
-    context = rag_chain.invoke(user_input)
+    context = rag_chain.invoke(f"Translate the following question into English: {user_input}")
     answer = chain_with_history.invoke(
         {"today" : today, "genre" : genre, "input" : user_input, "context" : context},
         config={"configurable": {"session_id": username}}
     )
+    print(context)
     return answer
