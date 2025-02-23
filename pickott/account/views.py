@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # 추가
-from .models import User, Genre
+from .models import User, Genre, Ott
 from django.shortcuts import get_object_or_404
 
 
@@ -77,6 +77,10 @@ class UserDetailView(APIView):
         response_data["preferred_genre"] = [
             genre.name for genre in user.preferred_genre.all()
             ]  # ManyToMany 관계에서 장르 이름만 추출
+        # 구독 OTT 리스트 변환
+        response_data["subscribed_ott"] = [
+            ott.name for ott in user.subscribed_ott.all()
+            ]  # ManyToMany 관계에서 OTT 이름만 추출
         
         return Response(response_data)
 
@@ -119,12 +123,25 @@ class UserDetailView(APIView):
         # 선호 장르 업데이트
         user.preferred_genre.set(genre_objects)  # set() 메서드로 ManyToMany 관계를 한 번에 업데이트
         
+        # ott 객체 처리
+        ott_objects = [
+            Ott.objects.get_or_create(name=ott_name)[0]
+            for ott_name in request.data.get("subscribed_ott", [])
+            ]
+        
+        # 구독 ott 업데이트
+        user.subscribed_ott.set(ott_objects)
+        
         # 응답 데이터 생성
         serializer = CreateUserSerializer(user)  # 업데이트된 유저 정보 직렬화
         response_data = serializer.data # 직렬화된 데이터 가져오기
         response_data["preferred_genre"] = [
             genre.name for genre in user.preferred_genre.all()
             ]  # 업데이트된 장르 리스트 포함
+        
+        response_data["subscribed_ott"] = [
+            ott.name for ott in user.subscribed_ott.all()
+            ] # 업데이트된 장르 리스트 포함
         
         return Response(response_data)
     
