@@ -8,3 +8,4 @@ class ChatBot(models.Model):
     )
     question = models.TextField()
     answer = models.TextField()
+    language = models.CharField(max_length=20)
