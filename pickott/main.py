@@ -161,8 +161,15 @@ def get_user_info():
 def update_user_genre(selected_genres):
     """유저의 선호 장르를 업데이트하는 함수"""
     headers = {"Authorization": f"Bearer {st.session_state.get('auth_token', '')}"}
+    
+    user_info = get_user_info()
+    existing_otts = user_info.get("subscribed_ott", [])  # 기존 구독 OTT 유지
 
-    data = {"preferred_genre": selected_genres}  # 🔥 리스트 형태 그대로 전달
+    # 기존 OTT 정보를 유지하면서 장르만 업데이트
+    data = {
+        "preferred_genre": selected_genres,
+        "subscribed_ott": existing_otts  # ✅ 기존 OTT 값 유지
+    }
     response = requests.put(f"{BASE_URL}/account/profile/", json=data, headers=headers)
 
     return response.status_code == 200  # 성공 여부 반환
@@ -171,9 +178,16 @@ def update_user_genre(selected_genres):
 def update_user_ott(selected_otts):
     """유저의 선호 장르를 업데이트하는 함수"""
     headers = {"Authorization": f"Bearer {st.session_state.get('auth_token', '')}"}
-    
-    data = {"subscribed_ott": selected_otts}  # 🔥 리스트 형태 그대로 전달
+    user_info = get_user_info()
+    existing_genres = user_info.get("preferred_genre", [])  # 기존 선호 장르 유지
+
+    # 기존 장르 정보를 유지하면서 OTT만 업데이트
+    data = {
+        "preferred_genre": existing_genres,  # ✅ 기존 선호 장르 값 유지
+        "subscribed_ott": selected_otts
+    }
     response = requests.put(f"{BASE_URL}/account/profile/", json=data, headers=headers)
+    
     
     return response.status_code == 200  # 성공 여부 반환
 
@@ -257,9 +271,9 @@ def myPage():
 
             
         if st.button("구독중인 ott 업데이트"):
-            if update_user_ott(selected_ott):
+            if update_user_ott(selected_otts):
                 st.success(
-                    f"✅ 구독중인 ott가 `{selected_ott}`(으)로 업데이트되었습니다!"
+                    f"✅ 구독중인 ott가 `{selected_otts}`(으)로 업데이트되었습니다!"
                 )
                 st.session_state["user_info"][
                     "subscribed_ott"
@@ -286,7 +300,15 @@ elif menu == "MyPage" and "auth_token" in st.session_state:
 # ✅ 챗봇 UI
 if "auth_token" in st.session_state and menu == "챗봇":
     st.subheader("💬 AI 챗봇")
+    
+    # 사용자가 선택할 수 있는 언어 설정
+    language_options = {"한국어": "ko", "English": "en", "日本語": "ja"}
+    selected_language = st.sidebar.selectbox("🌍 언어 선택 (Language)", list(language_options.keys()), index=0)  
 
+    # 선택한 언어를 세션에 저장
+    st.session_state["language"] = language_options[selected_language]  
+    
+    
     # 기존 메시지 출력 / 세션의 저장된 메세지를 차례대로 출력
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
@@ -304,7 +326,8 @@ if "auth_token" in st.session_state and menu == "챗봇":
             "Authorization": f"Bearer {st.session_state.get('auth_token', '')}"
         }  # 🔥 JWT 토큰 추가
         response = requests.post(
-            API_URL, json={"question": user_input}, headers=headers
+            API_URL,
+            json={"question": user_input, "language": st.session_state["language"]}, headers=headers
         )
 
         bot_reply = (
