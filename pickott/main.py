@@ -167,6 +167,15 @@ def update_user_genre(selected_genres):
 
     return response.status_code == 200  # 성공 여부 반환
 
+# 유저의 구독중인 ott 불러오기
+def update_user_ott(selected_otts):
+    """유저의 선호 장르를 업데이트하는 함수"""
+    headers = {"Authorization": f"Bearer {st.session_state.get('auth_token', '')}"}
+    
+    data = {"subscribed_ott": selected_otts}  # 🔥 리스트 형태 그대로 전달
+    response = requests.put(f"{BASE_URL}/account/profile/", json=data, headers=headers)
+    
+    return response.status_code == 200  # 성공 여부 반환
 
 # 개인 페이지 불러오기
 def myPage():
@@ -211,7 +220,7 @@ def myPage():
         selected_genres = st.multiselect(
             "🎬 변경할 선호 장르 선택", genre_list, default=current_genre
         )
-
+        
         # 🔹 장르 업데이트 버튼 (아직 구현 ❌)
         if st.button("선호 장르 업데이트"):
             if update_user_genre(selected_genres):
@@ -224,6 +233,40 @@ def myPage():
             else:
                 # 현재 Bad Request: /account/profile/ "PUT /account/profile/ HTTP/1.1" 400 72
                 st.error("🚨 장르 업데이트 실패!")
+
+
+
+        # 현재 구독중인 ott 표시
+        current_ott = user_info.get("subscribed_ott", "설정되지 않음")
+        st.write(f"🎭 현재 구독중인 ott: `{current_ott}`")
+        
+        # 🔹 구독 OTT 선택 (드롭다운)
+        ott_list = [
+            "Netflix",
+            "Watcha",
+            "Wavve",
+            "Tving",
+            "Coupang Play",
+            "Disney+",
+            "Hulu",
+            "Prime Video",
+        ]
+        selected_otts = st.multiselect(
+            "🎬 변경할 구독 OTT 선택", ott_list
+        )
+
+            
+        if st.button("구독중인 ott 업데이트"):
+            if update_user_ott(selected_ott):
+                st.success(
+                    f"✅ 구독중인 ott가 `{selected_ott}`(으)로 업데이트되었습니다!"
+                )
+                st.session_state["user_info"][
+                    "subscribed_ott"
+                ] = selected_otts  # UI 갱신
+            else:
+                # 현재 Bad Request: /account/profile/ "PUT /account/profile/ HTTP/1.1" 400 72
+                st.error("🚨 구독중인 ott 업데이트 실패!")
 
     else:
         st.error("🚨 유저 정보를 불러오지 못했습니다.")
@@ -241,7 +284,7 @@ elif menu == "MyPage" and "auth_token" in st.session_state:
     myPage()
 
 # ✅ 챗봇 UI
-if "auth_token" in st.session_state:
+if "auth_token" in st.session_state and menu == "챗봇":
     st.subheader("💬 AI 챗봇")
 
     # 기존 메시지 출력 / 세션의 저장된 메세지를 차례대로 출력

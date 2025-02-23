@@ -31,7 +31,13 @@ class Genre(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
 
+class Ott(models.Model):
+    """OTT 모델 (유저가 여러 개 선택 가능)"""
+
+    name = models.CharField(max_length=50, unique=True)
+
 
 # 선호 장르 컬럼을 추가하여 여러 장르를 선택할 수 있게 설정.
 class User(AbstractUser):
     preferred_genre = models.ManyToManyField(Genre, blank=True, related_name="users")
+    subscribed_ott = models.ManyToManyField(Ott, blank=True, related_name="otts")
