@@ -151,6 +151,6 @@ class UserDetailView(APIView):
 
 
     def delete(self, request):  # 유저 삭제
-        user = self.get_object(request)
+        user = request.user
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
