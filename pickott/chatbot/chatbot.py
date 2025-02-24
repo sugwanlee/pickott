@@ -29,22 +29,22 @@ str_outputparser = StrOutputParser()
 # 템플릿
 prompt = ChatPromptTemplate.from_messages(
     [
-        # rag에서 가져온 context
-        ("system", "{context}"),
         # chat_history로 key값을 불러옴
         MessagesPlaceholder(variable_name="chat_history"),
-        # - 스트리밍 플랫폼(넷플릭스, 디즈니+, 왓챠)에서 볼 수 있는 영화를 각 플랫폼마다 하나씩 추천하세요.
+        # - 스트리밍 플랫폼(넷플릭스, 디즈니+, 왓챠 등)에서 볼 수 있는 영화를 각 플랫폼마다 하나씩 추천하세요.
         (
             "system",
             """You are a movie recommendation assistant. Your goal is to provide helpful and relevant movie recommendations. YOU MUST ANSWER IN {language}.
                 - 아래의 조건을 기반으로 추천하세요.
-                - 오늘은 {today}입니다.
-                - system에 있는 영화 정보는 최근 영화입니다. 최근 영화를 찾아야 할 때에만 사용하십시오.
-                - {genre}가 human이 선호하는 장르입니다. 장르를 고려해서 평점이 높은 영화를 추천해주세요.
-                - {ott}별로 하나씩 추천해줘 없으면 ott 구분하지 말고 추천해줘.
+                - 오늘은 {today}입니다. 오늘자 이전의 영화를 알려주세요.
+                - {genre}는 유저가 선호하는 장르입니다. 장르를 고려해서 평점이 높은 영화를 추천해주세요.
+                - {ott}각 ott별로 하나씩 추천하고, 없으면 ott 구분하지 말고 추천해주세요.
                 - 각 영화마다 간략한 줄거리, 개봉일, 평점, 추천 이유, 그리고 해당 ott에서 볼 수 있는지 여부를 명확히 제시하세요.
+                - "system" 에 있는 영화 정보는 최근 영화입니다. 최근 영화를 찾을 때에만 사용하십시오.
             """,
         ),
+        # rag에서 가져온 context
+        ("system", "{context}"),
         # 물어본 질문(user_input)
         ("human", "{input}"),
     ]
@@ -59,8 +59,6 @@ if User.objects.all() is not None:
             for c in u.chatbots.order_by('-pk')[:5]:
                 store[u.username].add_message(HumanMessage(content=c.question))
                 store[u.username].add_message(AIMessage(content=c.answer))
-
-print(store)
 
 # 임베딩 모델 설정
 embeddings = OpenAIEmbeddings(
@@ -95,7 +93,6 @@ chain = prompt | chat | str_outputparser
 
 # 대화 세션에 대화를 입력해줄 함수
 def get_session_history(session_ids):
-    print(f"[대화 세션ID]: {session_ids}")
     if session_ids not in store:  # 세션 ID가 store에 없는 경우
         # 새로운 ChatMessageHistory 객체를 생성하여 store에 저장
         store[session_ids] = ChatMessageHistory()
@@ -119,5 +116,4 @@ def chatbot_call(user_input, username, genre, ott, language):
         {"language" : language, "today" : today, "genre" : genre, "ott" : ott, "input" : user_input, "context" : context},
         config={"configurable": {"session_id": username}}
     )
-    print(context)
     return answer
