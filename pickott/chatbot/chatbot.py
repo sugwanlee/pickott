@@ -52,12 +52,13 @@ prompt = ChatPromptTemplate.from_messages(
 
 store = {}
 
-for u in User.objects.all():
-    store[u.username] = ChatMessageHistory()
-    if u.chatbots is not None:
-        for c in u.chatbots.order_by('-pk')[:5]:
-            store[u.username].add_message(HumanMessage(content=c.question))
-            store[u.username].add_message(AIMessage(content=c.answer))
+if User.objects.all() is not None:
+    for u in User.objects.all():
+        store[u.username] = ChatMessageHistory()
+        if u.chatbots is not None:
+            for c in u.chatbots.order_by('-pk')[:5]:
+                store[u.username].add_message(HumanMessage(content=c.question))
+                store[u.username].add_message(AIMessage(content=c.answer))
 
 print(store)
 
