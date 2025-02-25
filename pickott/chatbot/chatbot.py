@@ -28,21 +28,17 @@ str_outputparser = StrOutputParser()
 
 # 템플릿
 prompt = ChatPromptTemplate.from_messages(
-    [   
-        # rag에서 가져온 context
-        ("system", "{context}"),
-        # chat_history로 key값을 불러옴
-        MessagesPlaceholder(variable_name="chat_history"),
+    [   MessagesPlaceholder(variable_name="chat_history"),
         # - 스트리밍 플랫폼(넷플릭스, 디즈니+, 왓챠 등)에서 볼 수 있는 영화를 각 플랫폼마다 하나씩 추천하세요.
         (
             "system",
-            """You are a movie recommendation assistant. Your goal is to provide helpful and relevant movie recommendations. YOU MUST ANSWER IN {language}.
+            """당신은 영화 추천 전문가입니다. 반드시 다음 언어로 답변하시오 : {language}.
                 - 아래의 조건을 기반으로 추천하세요.
                 - 오늘은 {today}입니다. 오늘자 이전의 영화를 알려주세요.
                 - {genre}는 유저가 선호하는 장르입니다. 장르를 고려해서 평점이 높은 영화를 추천해주세요.
                 - {ott}각 ott별로 하나씩 추천하고, 없으면 ott 구분하지 말고 추천해주세요.
                 - 각 영화마다 간략한 줄거리, 개봉일, 평점, 추천 이유, 그리고 해당 ott에서 볼 수 있는지 여부를 명확히 제시하세요.
-                - "system"에 있는 영화는 최신 영화 입니다. "최신, 최근"이라는 키워드가 들어오면 최신영화를 추천하십시오.
+                - "최신", "최근", "요새" 라는 키워드가 질문에 있을때만 다음 영화들에서 추천하십시오 : {context}
             """,
         ),
         # 물어본 질문(user_input)
@@ -111,7 +107,7 @@ chain_with_history = RunnableWithMessageHistory(
 
 def chatbot_call(user_input, username, genre, ott, language):
 
-    context = rag_chain.invoke(f"Translate the following question into English: {user_input}")
+    context = rag_chain.invoke(f"Translate the following question into English: {user_input}, {ott}, {genre}")
     answer = chain_with_history.invoke(
         {"language" : language, "today" : today, "genre" : genre, "ott" : ott, "input" : user_input, "context" : context},
         config={"configurable": {"session_id": username}}
