@@ -8,12 +8,12 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 BASE_URL = "http://127.0.0.1:8000"
 
 st.set_page_config(page_title="PickOtt")
-# 사용자가 선택할 수 있는 언어 설정
 language_options = {"Korean": "한국어", "English": "English", "Japanese": "日本語"}
-selected_language = st.sidebar.selectbox("🌍 Language", list(language_options.keys()), index=0)  
+selected_language = st.sidebar.selectbox("🌍 Language", list(language_options.values()), index=0)
+st.session_state["language"] = selected_language
 
 # 선택한 언어를 세션에 저장
-st.session_state["language"] = language_options[selected_language]  
+st.session_state["language"] = selected_language
 
 if st.session_state["language"] == "한국어":
     st.title("🤖 AI 피콧")
@@ -297,6 +297,7 @@ def myPage():
         selected_otts = st.multiselect(
             "🎬 Select the OTT subscription you want to change", ott_list
         )
+        print(selected_otts)
 
             
         if st.button("Update OTT"):
