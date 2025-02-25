@@ -52,7 +52,7 @@ prompt = ChatPromptTemplate.from_messages(
 
 store = {}
 
-if User.objects.all() is not None:
+if User.objects.exists():
     for u in User.objects.all():
         store[u.username] = ChatMessageHistory()
         if u.chatbots is not None:
