@@ -71,7 +71,7 @@ vector_store = Chroma(
 if not vector_store._collection.count():
     # Data Load
     loader = CSVLoader(
-        file_path="./data/tmdb_data.csv",
+        file_path=f"{BASE_DIR}/data/tmdb_data.csv",
         encoding="utf-8",
     )
     whole_data = loader.load()
