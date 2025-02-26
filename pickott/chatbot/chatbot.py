@@ -4,10 +4,11 @@ from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain.schema import HumanMessage, AIMessage
-from langchain_core.output_parsers import StrOutputParser, CommaSeparatedListOutputParser
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_core.runnables import RunnableLambda
 from pathlib import Path
+from langchain_community.document_loaders import CSVLoader
 import datetime
 import os
 from account.models import User
@@ -68,7 +69,20 @@ vector_store = Chroma(
 
 # 벡터 DB가 비어 있는지 체크
 if not vector_store._collection.count():
-    print("기존 벡터 DB에 데이터가 없습니다. 먼저 임베딩을 수행하세요.")
+    # Data Load
+    loader = CSVLoader(
+        file_path="./data/tmdb_data.csv",
+        encoding="utf-8",
+    )
+    whole_data = loader.load()
+
+    # Vector Store
+    vector_store = Chroma.from_documents(
+        documents=whole_data, # split_data 대신 whole_data 를 그대로 사용
+        embedding=embeddings,
+        persist_directory="my_vector_store",
+    )
+    print("벡터 DB를 생성하였습니다.")
 else:
     print("기존 벡터 DB를 불러왔습니다.")
 
