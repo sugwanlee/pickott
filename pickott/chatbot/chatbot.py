@@ -80,7 +80,7 @@ if not vector_store._collection.count():
     vector_store = Chroma.from_documents(
         documents=whole_data, # split_data 대신 whole_data 를 그대로 사용
         embedding=embeddings,
-        persist_directory="my_vector_store",
+        persist_directory=f"{BASE_DIR}/my_vector_store",
     )
     print("벡터 DB를 생성하였습니다.")
 else:
